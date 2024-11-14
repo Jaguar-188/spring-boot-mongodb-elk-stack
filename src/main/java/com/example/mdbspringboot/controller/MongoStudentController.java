@@ -99,7 +99,7 @@ public class MongoStudentController {
         }
         catch(Exception e) {
             log.error("Exception occurred while fetching student's data : " +e.getMessage());
-            apiResponse.setMessage("Provided data "+name+" is not present in collection.");
+            apiResponse.setMessage("Provided name "+name+" is not present in collection.");
             apiResponse.setStatusCode(String.valueOf(HttpStatus.NOT_FOUND));
         }
         return apiResponse;
