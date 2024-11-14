@@ -1,5 +1,6 @@
 package com.example.mdbspringboot.service;
 
+import com.example.mdbspringboot.exceptions.UserNotFoundException;
 import com.example.mdbspringboot.model.entity.Student;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -61,6 +62,9 @@ public class MongoStudentService {
                 for (Student student : this.studentRepository.findAll()) {
                     if (student.getName().equalsIgnoreCase(name)) {
                         students.add(student);
+                    }
+                    else{
+                        throw new UserNotFoundException("Provided name " + name + " is not present in collection");
                     }
                 }
             }
