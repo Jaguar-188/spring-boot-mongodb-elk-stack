@@ -128,5 +128,32 @@ public class MongoStudentController {
         return apiResponse;
     }
 
+    @PostMapping(value = "/addBulkStudentData")
+    @Operation(description = "It adds the new student record/document to the collection.",
+            method = "POST",
+            responses = {@ApiResponse(responseCode = "201", description = "Created", content = @Content(mediaType = "application/json")),
+                    @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = "application/json")),
+                    @ApiResponse(responseCode = "500", description = "Server side problem", content = @Content(mediaType = "application/json"))})
+    public com.example.mdbspringboot.model.entity.ApiResponse addBulkStudentData() {
+
+        com.example.mdbspringboot.model.entity.ApiResponse apiResponse = new com.example.mdbspringboot.model.entity.ApiResponse();
+        StopWatch stopWatch = new StopWatch();
+        try {
+
+            log.info("Adding data to the collection.");
+            stopWatch.start();
+            apiResponse.setStudentDetails(mongoStudentService.saveBulkStudentDetails());
+            apiResponse.setStatusCode(String.valueOf(HttpStatus.CREATED));
+            stopWatch.stop();
+            log.info("Total time taken to add documents to the collection : {} seconds ",stopWatch.getTotalTimeSeconds());
+
+        } catch (Exception e) {
+            log.error("Exception occurred while adding student's data to the collection : " +e.getMessage());
+            apiResponse.setMessage("Error while adding details of students.");
+            apiResponse.setStatusCode(String.valueOf(HttpStatus.BAD_REQUEST));
+        }
+        return apiResponse;
+    }
+
 }
 
