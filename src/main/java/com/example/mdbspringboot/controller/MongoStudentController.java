@@ -57,14 +57,14 @@ public class MongoStudentController {
                method = "PUT",
                responses = { @ApiResponse(responseCode = "202", description = "Accepted"),
                              @ApiResponse(responseCode = "403", description = "Bad Request")})
-    public com.example.mdbspringboot.model.entity.ApiResponse updateStudentData(@RequestBody List<Student> students){
+    public com.example.mdbspringboot.model.entity.ApiResponse updateStudentData(@RequestBody Student student){
 
         com.example.mdbspringboot.model.entity.ApiResponse apiResponse = new com.example.mdbspringboot.model.entity.ApiResponse();
         StopWatch stopWatch = new StopWatch();
         try {
             log.info("Started updating the data.");
             stopWatch.start();
-            apiResponse.setStudentDetails(mongoStudentService.updateStudentData(students));
+            apiResponse.setStudentDetails(List.of(mongoStudentService.updateStudentData(student)));
             apiResponse.setStatusCode(String.valueOf(HttpStatus.ACCEPTED));
             stopWatch.stop();
             log.info("Total time taken to update the requested documents : {} seconds ",stopWatch.getTotalTimeSeconds());
@@ -154,6 +154,5 @@ public class MongoStudentController {
         }
         return apiResponse;
     }
-
 }
 
