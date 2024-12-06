@@ -31,9 +31,9 @@ public class MongoStudentController {
             responses = {@ApiResponse(responseCode = "201", description = "Created", content = @Content(mediaType = "application/json")),
                     @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = "application/json")),
                     @ApiResponse(responseCode = "500", description = "Server side problem", content = @Content(mediaType = "application/json"))})
-    public com.example.mdbspringboot.model.entity.ApiResponse addStudentData(@RequestBody List<Student> students) {
+    public com.example.mdbspringboot.utils.ApiResponse addStudentData(@RequestBody List<Student> students) {
 
-        com.example.mdbspringboot.model.entity.ApiResponse apiResponse = new com.example.mdbspringboot.model.entity.ApiResponse();
+        com.example.mdbspringboot.utils.ApiResponse apiResponse = new com.example.mdbspringboot.utils.ApiResponse();
         StopWatch stopWatch = new StopWatch();
         try {
 
@@ -57,9 +57,9 @@ public class MongoStudentController {
                method = "PUT",
                responses = { @ApiResponse(responseCode = "202", description = "Accepted"),
                              @ApiResponse(responseCode = "403", description = "Bad Request")})
-    public com.example.mdbspringboot.model.entity.ApiResponse updateStudentData(@RequestBody Student student){
+    public com.example.mdbspringboot.utils.ApiResponse updateStudentData(@RequestBody Student student){
 
-        com.example.mdbspringboot.model.entity.ApiResponse apiResponse = new com.example.mdbspringboot.model.entity.ApiResponse();
+        com.example.mdbspringboot.utils.ApiResponse apiResponse = new com.example.mdbspringboot.utils.ApiResponse();
         StopWatch stopWatch = new StopWatch();
         try {
             log.info("Started updating the data.");
@@ -83,19 +83,20 @@ public class MongoStudentController {
                responses = { @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = "application/json")),
                              @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = "application/json")),
                              @ApiResponse(responseCode = "500", description = "Server side problem", content = @Content(mediaType = "application/json"))})
-    public com.example.mdbspringboot.model.entity.ApiResponse
+    public com.example.mdbspringboot.utils.ApiResponse
     getStudentDetails(@Valid @Parameter(description = "Please provide the name.")
                       @RequestParam(required = false, defaultValue = "") String name,
                       @RequestParam(defaultValue = "0") int page){
 
+        com.example.mdbspringboot.utils.ApiResponse apiResponse = new com.example.mdbspringboot.utils.ApiResponse();
         List<Student> students;
-        com.example.mdbspringboot.model.entity.ApiResponse apiResponse = new com.example.mdbspringboot.model.entity.ApiResponse();
         StopWatch stopWatch = new StopWatch();
         try {
             log.info("Started fetching the documents from collection ");
             stopWatch.start();
             students = mongoStudentService.getStudentDetails(name,page);
             apiResponse.setStudentDetails(students);
+            apiResponse.setMessage("Success");
             apiResponse.setStatusCode(String.valueOf(HttpStatus.OK));
             stopWatch.stop();
             log.info("Total time required to fetch all the documents : {} seconds ",stopWatch.getTotalTimeSeconds());
@@ -113,9 +114,9 @@ public class MongoStudentController {
                     method = "DELETE",
                  responses = { @ApiResponse(responseCode = "200", description = "Ok"),
                                @ApiResponse(responseCode = "404", description = "Record/Document not found", content = @Content(mediaType = "application/json"))})
-    public com.example.mdbspringboot.model.entity.ApiResponse deleteStudentData(@RequestParam String name){
+    public com.example.mdbspringboot.utils.ApiResponse deleteStudentData(@RequestParam String name){
 
-        com.example.mdbspringboot.model.entity.ApiResponse apiResponse = new com.example.mdbspringboot.model.entity.ApiResponse();
+        com.example.mdbspringboot.utils.ApiResponse apiResponse = new com.example.mdbspringboot.utils.ApiResponse();
         StopWatch stopWatch = new StopWatch();
         try {
             stopWatch.start();
@@ -137,9 +138,9 @@ public class MongoStudentController {
             responses = {@ApiResponse(responseCode = "201", description = "Created", content = @Content(mediaType = "application/json")),
                     @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = "application/json")),
                     @ApiResponse(responseCode = "500", description = "Server side problem", content = @Content(mediaType = "application/json"))})
-    public com.example.mdbspringboot.model.entity.ApiResponse addBulkStudentData() {
+    public com.example.mdbspringboot.utils.ApiResponse addBulkStudentData() {
 
-        com.example.mdbspringboot.model.entity.ApiResponse apiResponse = new com.example.mdbspringboot.model.entity.ApiResponse();
+        com.example.mdbspringboot.utils.ApiResponse apiResponse = new com.example.mdbspringboot.utils.ApiResponse();
         StopWatch stopWatch = new StopWatch();
         try {
 
