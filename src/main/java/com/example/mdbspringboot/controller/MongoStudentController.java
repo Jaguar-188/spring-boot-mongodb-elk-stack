@@ -83,7 +83,10 @@ public class MongoStudentController {
                responses = { @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = "application/json")),
                              @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = "application/json")),
                              @ApiResponse(responseCode = "500", description = "Server side problem", content = @Content(mediaType = "application/json"))})
-    public com.example.mdbspringboot.model.entity.ApiResponse getStudentDetails(@Valid @Parameter(description = "Please provide the name.") @RequestParam(required = false, defaultValue = "") String name){
+    public com.example.mdbspringboot.model.entity.ApiResponse
+    getStudentDetails(@Valid @Parameter(description = "Please provide the name.")
+                      @RequestParam(required = false, defaultValue = "") String name,
+                      @RequestParam(defaultValue = "0") int page){
 
         List<Student> students;
         com.example.mdbspringboot.model.entity.ApiResponse apiResponse = new com.example.mdbspringboot.model.entity.ApiResponse();
@@ -91,7 +94,7 @@ public class MongoStudentController {
         try {
             log.info("Started fetching the documents from collection ");
             stopWatch.start();
-            students = mongoStudentService.getStudentDetails(name);
+            students = mongoStudentService.getStudentDetails(name,page);
             apiResponse.setStudentDetails(students);
             apiResponse.setStatusCode(String.valueOf(HttpStatus.OK));
             stopWatch.stop();
