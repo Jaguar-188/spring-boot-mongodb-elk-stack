@@ -6,9 +6,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.example.mdbspringboot.repository.MongoStudentRepository;
+import org.springframework.boot.autoconfigure.data.web.SpringDataWebProperties;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -42,12 +44,16 @@ public class MongoStudentService {
     }
 
     @Cacheable(value = "students")
-    public List<Student> getStudentDetails(String name){
+    public List<Student> getStudentDetails(String name,int page){
 
         log.info("Fetching data of {}",name);
+        Pageable pageable = PageRequest.of(page,10,Sort.by("name").ascending());
+
         List<Student> students = new ArrayList<>();
+
         if(StringUtils.equalsIgnoreCase(name,"")) {
-            students = this.studentRepository.findAll();
+            Page<Student> pageableResponse = this.studentRepository.findAll(pageable);
+            students = pageableResponse.getContent();
         }
         else {
 //            /**
@@ -71,7 +77,7 @@ public class MongoStudentService {
              * Structured Approach
              */
             if(!StringUtils.equalsIgnoreCase(name,"") || !StringUtils.equals(name,null)) {
-                students = this.studentRepository.findAll()
+                students = this.studentRepository.findAll(pageable)
                         .stream()
                         .filter(student -> student.getName().toLowerCase().contains(name))
                         .collect(Collectors.toList());
