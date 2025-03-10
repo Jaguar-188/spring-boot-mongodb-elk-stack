@@ -1,5 +1,6 @@
 package com.example.mdbspringboot.controller;
 
+import com.example.mdbspringboot.exceptions.UserNotFoundException;
 import com.example.mdbspringboot.model.entity.Student;
 import com.example.mdbspringboot.service.MongoStudentService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -45,7 +46,7 @@ public class MongoStudentController {
             log.info("Total time taken to add documents to the collection : {} seconds ",stopWatch.getTotalTimeSeconds());
 
         } catch (Exception e) {
-            log.error("Exception occurred while adding student's data to the collection : " +e.getMessage());
+            log.error("Exception occurred while adding student's data to the collection : " + e.getMessage());
             apiResponse.setMessage("Error while adding details of students.");
             apiResponse.setStatusCode(String.valueOf(HttpStatus.BAD_REQUEST));
         }
@@ -94,17 +95,17 @@ public class MongoStudentController {
         try {
             log.info("Started fetching the documents from collection ");
             stopWatch.start();
-            students = mongoStudentService.getStudentDetails(name,page);
+            students = mongoStudentService.getStudentDetails(name);
             apiResponse.setStudentDetails(students);
             apiResponse.setMessage("Success");
             apiResponse.setStatusCode(String.valueOf(HttpStatus.OK));
             stopWatch.stop();
             log.info("Total time required to fetch all the documents : {} seconds ",stopWatch.getTotalTimeSeconds());
         }
-        catch(Exception e) {
+        catch(UserNotFoundException e) {
             log.error("Exception occurred while fetching student's data : " +e.getMessage());
-            apiResponse.setMessage("Provided name "+name+" is not present in collection.");
-            apiResponse.setStatusCode(String.valueOf(HttpStatus.NOT_FOUND));
+            apiResponse.setMessage(e.getMessage());
+            apiResponse.setStatusCode(String.valueOf(HttpStatus.NOT_FOUND).substring(0,3));
         }
         return apiResponse;
     }
@@ -114,13 +115,13 @@ public class MongoStudentController {
                     method = "DELETE",
                  responses = { @ApiResponse(responseCode = "200", description = "Ok"),
                                @ApiResponse(responseCode = "404", description = "Record/Document not found", content = @Content(mediaType = "application/json"))})
-    public com.example.mdbspringboot.utils.ApiResponse deleteStudentData(@RequestParam String name){
+    public com.example.mdbspringboot.utils.ApiResponse deleteStudentData(@RequestParam String id){
 
         com.example.mdbspringboot.utils.ApiResponse apiResponse = new com.example.mdbspringboot.utils.ApiResponse();
         StopWatch stopWatch = new StopWatch();
         try {
             stopWatch.start();
-            mongoStudentService.deleteStudentData(name);
+            mongoStudentService.deleteStudentData(id);
             apiResponse.setStatusCode(String.valueOf(HttpStatus.NO_CONTENT));
             stopWatch.stop();
             log.info("Time required to delete the document : {} seconds ",stopWatch.getTotalTimeSeconds());
