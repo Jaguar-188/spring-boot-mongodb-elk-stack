@@ -6,7 +6,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.example.mdbspringboot.repository.MongoStudentRepository;
-import org.springframework.boot.autoconfigure.data.web.SpringDataWebProperties;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
@@ -14,13 +13,8 @@ import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import java.util.*;
+
 import java.util.stream.Collectors;
 
 @Service
@@ -44,12 +38,12 @@ public class MongoStudentService {
     }
 
     @Cacheable(value = "students")
-    public List<Student> getStudentDetails(String name,int page){
+    public List<Student> getStudentDetails(String name){
 
         log.info("Fetching data of {}",name);
-        Pageable pageable = PageRequest.of(page,10,Sort.by("name").ascending());
+        Pageable pageable = PageRequest.of(0,10);
 
-        List<Student> students = new ArrayList<>();
+        List<Student> students = new ArrayList<>(500);
 
         if(StringUtils.equalsIgnoreCase(name,"")) {
             Page<Student> pageableResponse = this.studentRepository.findAll(pageable);
@@ -77,10 +71,13 @@ public class MongoStudentService {
              * Structured Approach
              */
             if(!StringUtils.equalsIgnoreCase(name,"") || !StringUtils.equals(name,null)) {
-                students = this.studentRepository.findAll(pageable)
-                        .stream()
-                        .filter(student -> student.getName().toLowerCase().contains(name))
-                        .collect(Collectors.toList());
+
+                students = this.studentRepository.findAll()
+                                .stream()
+                                .filter(student -> student.getName().equalsIgnoreCase(name))
+                                .filter(student -> student.getStream().equalsIgnoreCase("IT"))
+                                .collect(Collectors.toList());
+
                 if (students.isEmpty()) {
                     throw new UserNotFoundException("Provided name " + name + " is not present in collection");
                 }
@@ -92,28 +89,13 @@ public class MongoStudentService {
     @CachePut(value = "students", key = "#result.id")
     public Student updateStudentData(Student student){
 
-        Student studentTobeUpdated = this.studentRepository.findByUserId(student.getId());
-
-        studentTobeUpdated.setName(student.getName());
-        studentTobeUpdated.setStream(student.getStream());
-        studentTobeUpdated.setHobby(student.getHobby());
-        studentTobeUpdated.setClassName(student.getClassName());
-        studentTobeUpdated.setHas_girlfriend(student.getHas_girlfriend());
-
-        return this.studentRepository.save(studentTobeUpdated);
+        return this.studentRepository.save(student);
     }
 
     @CacheEvict(value = "students",key = "#id")
-    public void deleteStudentData(String name){
+    public void deleteStudentData(String id){
 
-        List<Student> studentList = this.studentRepository.findAll();
-        for(Student student : studentList)
-        {
-            if(student.getName().equalsIgnoreCase(name))
-            {
-                this.studentRepository.deleteById(student.getId());
-            }
-        }
+        this.studentRepository.deleteById(id);
     }
 
     @Transactional
