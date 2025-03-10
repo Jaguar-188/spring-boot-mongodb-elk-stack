@@ -24,7 +24,7 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
                 String.valueOf(HttpStatus.NOT_FOUND),
                 Integer.parseInt(String.valueOf(HttpStatus.NOT_FOUND).substring(0,2)));
 
-        return new ResponseEntity<ExceptionMessage>(exception,HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(exception,HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler({BadRequestException.class})
@@ -37,6 +37,6 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
                 String.valueOf(HttpStatus.BAD_REQUEST),
                 Integer.parseInt(String.valueOf(HttpStatus.BAD_REQUEST).substring(0,2)));
 
-        return new ResponseEntity<ExceptionMessage>(exception,HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(exception,HttpStatus.BAD_REQUEST);
     }
 }
