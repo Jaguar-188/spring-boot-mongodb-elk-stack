@@ -1,14 +1,15 @@
 package com.example.mdbspringboot.controller;
 
-import com.example.mdbspringboot.exceptions.UserNotFoundException;
+import com.example.mdbspringboot.config.Logging;
+import com.example.mdbspringboot.model.entity.LoginRequest;
 import com.example.mdbspringboot.model.entity.Student;
 import com.example.mdbspringboot.service.MongoStudentService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.util.StopWatch;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,10 +18,11 @@ import java.util.List;
 
 @RestController
 @RequestMapping("rest/v1/mongo-controller-for-crud-operations/api")
-@Slf4j
 public class MongoStudentController {
 
     private MongoStudentService mongoStudentService;
+
+    private final Logging log = Logging.getLog();
 
     public MongoStudentController(MongoStudentService mongoStudentService) {
         this.mongoStudentService = mongoStudentService;
@@ -102,10 +104,11 @@ public class MongoStudentController {
             stopWatch.stop();
             log.info("Total time required to fetch all the documents : {} seconds ",stopWatch.getTotalTimeSeconds());
         }
-        catch(UserNotFoundException e) {
+        catch(Exception e) {
             log.error("Exception occurred while fetching student's data : " +e.getMessage());
             apiResponse.setMessage(e.getMessage());
             apiResponse.setStatusCode(String.valueOf(HttpStatus.NOT_FOUND).substring(0,3));
+            throw e;
         }
         return apiResponse;
     }
@@ -158,6 +161,21 @@ public class MongoStudentController {
             apiResponse.setStatusCode(String.valueOf(HttpStatus.BAD_REQUEST));
         }
         return apiResponse;
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<String> login(@RequestBody LoginRequest request) {
+        log.info("Validating Login");
+        boolean isAuthenticated = mongoStudentService.login(request.getUsername(), request.getPassword());
+        if (isAuthenticated) {
+            log.info("Successful Login");
+            return ResponseEntity.ok("Login Successful");
+        }
+        else {
+            log.error("Login Unsuccessful");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
+        }
+
     }
 }
 
