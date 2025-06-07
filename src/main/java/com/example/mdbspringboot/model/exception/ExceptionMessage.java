@@ -16,5 +16,4 @@ public class ExceptionMessage {
     private String details;
     private String statusLine;
     private int statusCode;
-
 }

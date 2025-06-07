@@ -1,5 +1,6 @@
 package com.example.mdbspringboot.exceptions;
 
+import com.example.mdbspringboot.config.Logging;
 import com.example.mdbspringboot.model.exception.ExceptionMessage;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,30 +13,50 @@ import java.time.LocalDateTime;
 
 
 @RestControllerAdvice
-public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
+public class CustomExceptionHandler {
 
-    @ExceptionHandler({UserNotFoundException.class})
-    protected ResponseEntity<ExceptionMessage> UserNotFoundExceptionHandler(ExceptionMessage ex, WebRequest webRequest){
+    private static final Logging log = Logging.getLog();
 
-        String message = "Provided name " +ex.getMessage()+ " is not present in collection. ";
+    @ExceptionHandler(UserNotFoundException.class)
+    protected ResponseEntity<ExceptionMessage> UserNotFoundExceptionHandler(UserNotFoundException ex, WebRequest webRequest){
 
-        ExceptionMessage exception = new ExceptionMessage(LocalDateTime.now(),message,
-                webRequest.getDescription(false),
+        log.info("Resolving User Not Found Exception");
+
+        ExceptionMessage exception = new ExceptionMessage(LocalDateTime.now(),
+                ex.getMessage(),
+                webRequest.getDescription(false).replace("uri=",""),
                 String.valueOf(HttpStatus.NOT_FOUND),
-                Integer.parseInt(String.valueOf(HttpStatus.NOT_FOUND).substring(0,2)));
+                Integer.parseInt(String.valueOf(HttpStatus.NOT_FOUND).substring(0,3)));
 
         return new ResponseEntity<>(exception,HttpStatus.NOT_FOUND);
     }
 
-    @ExceptionHandler({BadRequestException.class})
-    protected ResponseEntity<ExceptionMessage> BadRequestExceptionHandler(ExceptionMessage ex, WebRequest webRequest){
+    @ExceptionHandler(BadRequestException.class)
+    protected ResponseEntity<ExceptionMessage> BadRequestExceptionHandler(BadRequestException ex, WebRequest webRequest){
 
-        String message = "Bad Request";
+        log.info("Resolving Bad Request Exception");
 
-        ExceptionMessage exception = new ExceptionMessage(LocalDateTime.now(),message,
-                webRequest.getDescription(true),
+        ExceptionMessage exception = new ExceptionMessage(LocalDateTime.now(),
+                ex.getMessage(),
+                webRequest.getDescription(false).replace("uri=",""),
                 String.valueOf(HttpStatus.BAD_REQUEST),
-                Integer.parseInt(String.valueOf(HttpStatus.BAD_REQUEST).substring(0,2)));
+                Integer.parseInt(String.valueOf(HttpStatus.BAD_REQUEST).substring(0,3)));
+
+        return new ResponseEntity<>(exception,HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler({TypeMisMatchException.class})
+    protected ResponseEntity<ExceptionMessage> TypeMisMatchExceptionHandler(TypeMisMatchException ex, WebRequest webRequest){
+
+        log.info("Resolving Type MisMatch Exception");
+
+        ExceptionMessage exception = new ExceptionMessage(
+                LocalDateTime.now(),
+                ex.getMessage(),
+                webRequest.getDescription(false).replace("uri=",""),
+                String.valueOf(HttpStatus.BAD_REQUEST),
+                Integer.parseInt(String.valueOf(HttpStatus.BAD_REQUEST).substring(0,3))
+        );
 
         return new ResponseEntity<>(exception,HttpStatus.BAD_REQUEST);
     }
