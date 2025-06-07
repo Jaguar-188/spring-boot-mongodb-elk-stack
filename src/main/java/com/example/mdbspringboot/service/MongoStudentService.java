@@ -3,6 +3,7 @@ package com.example.mdbspringboot.service;
 import com.example.mdbspringboot.exceptions.UserNotFoundException;
 import com.example.mdbspringboot.model.entity.Student;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.catalina.User;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.example.mdbspringboot.repository.MongoStudentRepository;
@@ -137,4 +138,13 @@ public class MongoStudentService {
         return updatedData;
     }
 
+    public boolean login(String username, String password) {
+
+        if(username.equalsIgnoreCase("Ruturaj") && password.equalsIgnoreCase("hello")){
+            return true;
+        }
+        else{
+            throw new UserNotFoundException("Invalid Credentials");
+        }
+    }
 }
