@@ -1,9 +1,11 @@
 package com.example.mdbspringboot.service;
 
 import com.example.mdbspringboot.exceptions.UserNotFoundException;
+import com.example.mdbspringboot.model.DTO.StudentDTO;
 import com.example.mdbspringboot.model.entity.Student;
+import com.example.mdbspringboot.model.entity.StudentInfo;
+import com.example.mdbspringboot.repository.StudentInfoRepository;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.catalina.User;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.example.mdbspringboot.repository.MongoStudentRepository;
@@ -16,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Service
@@ -25,17 +28,16 @@ public class MongoStudentService {
     @Autowired
     private MongoStudentRepository studentRepository;
 
+    @Autowired
+    private StudentInfoRepository studentInfoRepository;
+
+    @Autowired
+    private StudentDataService studentDataService;
+
     @CachePut(value = "students", key = "#result.?[id]")
     public List<Student> saveStudentDetails(List<Student> students){
 
-        List<Student> updatedData = new ArrayList<>();
-        for(Student student : students)
-        {
-            Student tempStudent = this.studentRepository.save(student);
-            log.info("Successfully added student {}'s data to the collection. ",student.getName());
-            updatedData.add(tempStudent);
-        }
-        return updatedData;
+        return studentDataService.saveStudentDetails(students);
     }
 
     @Cacheable(value = "students")
@@ -47,7 +49,7 @@ public class MongoStudentService {
         List<Student> students = new ArrayList<>(500);
 
         if(StringUtils.equalsIgnoreCase(name,"")) {
-            Page<Student> pageableResponse = this.studentRepository.findAll(pageable);
+            Page<Student> pageableResponse = studentRepository.findAll(pageable);
             students = pageableResponse.getContent();
         }
         else {
@@ -73,7 +75,7 @@ public class MongoStudentService {
              */
             if(!StringUtils.equalsIgnoreCase(name,"") || !StringUtils.equals(name,null)) {
 
-                students = this.studentRepository.findAll()
+                students = studentRepository.findAll()
                                 .stream()
                                 .filter(student -> student.getName().equalsIgnoreCase(name))
                                 .filter(student -> student.getStream().equalsIgnoreCase("IT"))
@@ -90,13 +92,13 @@ public class MongoStudentService {
     @CachePut(value = "students", key = "#result.id")
     public Student updateStudentData(Student student){
 
-        return this.studentRepository.save(student);
+        return studentRepository.save(student);
     }
 
     @CacheEvict(value = "students",key = "#id")
     public void deleteStudentData(String id){
 
-        this.studentRepository.deleteById(id);
+        studentRepository.deleteById(id);
     }
 
     @Transactional
@@ -131,7 +133,7 @@ public class MongoStudentService {
             student.setClassName(classNames.get(random.nextInt(classNames.size())));
             student.setHobby(hobbies.get(random.nextInt(hobbies.size())));
             student.setHas_girlfriend(hasGirlfrind.get(random.nextInt(hasGirlfrind.size())));
-            Student tempStudent = this.studentRepository.save(student);
+            Student tempStudent = studentRepository.save(student);
             updatedData.add(tempStudent);
             log.info("Successfully added student {}'s data to the collection. ",tempStudent.getName());
         }
@@ -146,5 +148,26 @@ public class MongoStudentService {
         else{
             throw new UserNotFoundException("Invalid Credentials");
         }
+    }
+
+    public List<StudentDTO> getStudentDetailsAndMarks(String name) {
+
+        List<Student> students = studentRepository.findByName(name);
+        List<StudentDTO> listOfStudents = new ArrayList<>();
+
+        for(Student student: students)
+        {
+            StudentDTO studentDTO = new StudentDTO();
+            StudentInfo studentInfo = studentInfoRepository.findByStudentId(student.getId());
+            studentDTO.setId(student.getId());
+            studentDTO.setName(student.getName());
+            studentDTO.setClassName(student.getClassName());
+            studentDTO.setHobby(student.getHobby());
+            studentDTO.setStream(student.getStream());
+            studentDTO.setHas_girlfriend(student.getHas_girlfriend());
+            studentDTO.setPercentage(studentInfo.getPercentage());
+            listOfStudents.add(studentDTO);
+        }
+        return listOfStudents;
     }
 }

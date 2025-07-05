@@ -1,6 +1,7 @@
 package com.example.mdbspringboot.controller;
 
 import com.example.mdbspringboot.config.Logging;
+import com.example.mdbspringboot.model.DTO.StudentDTO;
 import com.example.mdbspringboot.model.entity.LoginRequest;
 import com.example.mdbspringboot.model.entity.Student;
 import com.example.mdbspringboot.service.MongoStudentService;
@@ -162,6 +163,43 @@ public class MongoStudentController {
         }
         return apiResponse;
     }
+
+    @GetMapping("/getStudentDetailsAndStudentMarks")
+    @Operation(description = "It retrieves all the students data from collection. ",
+            method = "GET",
+            responses = { @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = "application/json")),
+                    @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = "application/json")),
+                    @ApiResponse(responseCode = "500", description = "Server side problem", content = @Content(mediaType = "application/json"))})
+    public com.example.mdbspringboot.utils.ApiResponse
+    getStudentDetailsAndStudentMarks(@Valid @Parameter(description = "Please provide the name.")
+                      @RequestParam(required = false, defaultValue = "") String name,
+                      @RequestParam(defaultValue = "0") int page){
+
+        com.example.mdbspringboot.utils.ApiResponse apiResponse = new com.example.mdbspringboot.utils.ApiResponse();
+        List<StudentDTO> students;
+        StopWatch stopWatch = new StopWatch();
+
+        try
+        {
+            log.info("Started fetching the documents from collection ");
+            stopWatch.start();
+            students = mongoStudentService.getStudentDetailsAndMarks(name);
+            apiResponse.setStudentDetails(students);
+            apiResponse.setMessage("Success");
+            apiResponse.setStatusCode(String.valueOf(HttpStatus.OK));
+            stopWatch.stop();
+            log.info("Total time required to fetch all the documents : {} seconds ",stopWatch.getTotalTimeSeconds());
+        }
+        catch (Exception e)
+        {
+            log.error("Exception occurred while fetching student's data : " +e.getMessage());
+            apiResponse.setMessage(e.getMessage());
+            apiResponse.setStatusCode(String.valueOf(HttpStatus.NOT_FOUND).substring(0,3));
+        }
+        return apiResponse;
+    }
+
+
 
     @PostMapping("/login")
     public ResponseEntity<String> login(@RequestBody LoginRequest request) {
