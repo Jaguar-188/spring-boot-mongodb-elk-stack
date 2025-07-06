@@ -16,7 +16,7 @@ import org.springframework.http.ResponseEntity;
 public class MongoStudentControllerTest {
 
     @InjectMocks
-    private MongoStudentController mongoStudentController;
+    private AuthenticationController authenticationController;
 
     @Mock
     private MongoStudentService mongoStudentService;
@@ -33,7 +33,7 @@ public class MongoStudentControllerTest {
                 .when(mongoStudentService.login(loginRequest.getUsername(),loginRequest.getPassword()))
                 .thenReturn(true);
 
-        ResponseEntity<String> response = mongoStudentController.login(loginRequest);
+        ResponseEntity<String> response = authenticationController.login(loginRequest);
 
         Assertions.assertEquals(HttpStatus.OK,response.getStatusCode());
         Assertions.assertEquals("Login Successful",response.getBody());
@@ -49,7 +49,7 @@ public class MongoStudentControllerTest {
                 .when(mongoStudentService.login(loginRequest.getUsername(),loginRequest.getPassword()))
                 .thenReturn(false);
 
-        ResponseEntity<String> response = mongoStudentController.login(loginRequest);
+        ResponseEntity<String> response = authenticationController.login(loginRequest);
 
         Assertions.assertEquals(HttpStatus.UNAUTHORIZED,response.getStatusCode());
         Assertions.assertEquals("Invalid credentials",response.getBody());

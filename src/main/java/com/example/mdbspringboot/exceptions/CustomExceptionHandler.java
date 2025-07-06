@@ -60,4 +60,36 @@ public class CustomExceptionHandler {
 
         return new ResponseEntity<>(exception,HttpStatus.BAD_REQUEST);
     }
+
+    @ExceptionHandler({InsufficientAmountException.class})
+    protected ResponseEntity<ExceptionMessage> insufficientAmountExceptionHandler(InsufficientAmountException insufficientAmountException, WebRequest webRequest){
+
+        log.info("Resolving Insufficient Amount Exception");
+
+        ExceptionMessage exception = new ExceptionMessage(
+                LocalDateTime.now(),
+                insufficientAmountException.getMessage(),
+                webRequest.getDescription(false).replace("uri=",""),
+                String.valueOf(HttpStatus.NOT_ACCEPTABLE),
+                Integer.parseInt(String.valueOf(HttpStatus.NOT_ACCEPTABLE).substring(0,3))
+        );
+
+        return new ResponseEntity<>(exception,HttpStatus.NOT_ACCEPTABLE);
+    }
+
+    @ExceptionHandler({AmountCanNotBeNegativeOrZero.class})
+    protected ResponseEntity<ExceptionMessage> amountCanNotBeNegativeOrZero(AmountCanNotBeNegativeOrZero amountCanNotBeNegativeOrZero, WebRequest webRequest){
+
+        log.info("Resolving Amount can not be Zero or Negative Exception");
+
+        ExceptionMessage exception = new ExceptionMessage(
+                LocalDateTime.now(),
+                amountCanNotBeNegativeOrZero.getMessage(),
+                webRequest.getDescription(false).replace("uri=",""),
+                String.valueOf(HttpStatus.BAD_REQUEST),
+                Integer.parseInt(String.valueOf(HttpStatus.BAD_REQUEST).substring(0,3))
+        );
+
+        return new ResponseEntity<>(exception,HttpStatus.BAD_REQUEST);
+    }
 }

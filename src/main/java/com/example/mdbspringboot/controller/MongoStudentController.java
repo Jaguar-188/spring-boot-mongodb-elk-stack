@@ -2,7 +2,6 @@ package com.example.mdbspringboot.controller;
 
 import com.example.mdbspringboot.config.Logging;
 import com.example.mdbspringboot.model.DTO.StudentDTO;
-import com.example.mdbspringboot.model.entity.LoginRequest;
 import com.example.mdbspringboot.model.entity.Student;
 import com.example.mdbspringboot.service.MongoStudentService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -10,7 +9,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.util.StopWatch;
 import org.springframework.web.bind.annotation.*;
 
@@ -197,23 +195,6 @@ public class MongoStudentController {
             apiResponse.setStatusCode(String.valueOf(HttpStatus.NOT_FOUND).substring(0,3));
         }
         return apiResponse;
-    }
-
-
-
-    @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody LoginRequest request) {
-        log.info("Validating Login");
-        boolean isAuthenticated = mongoStudentService.login(request.getUsername(), request.getPassword());
-        if (isAuthenticated) {
-            log.info("Successful Login");
-            return ResponseEntity.ok("Login Successful");
-        }
-        else {
-            log.error("Login Unsuccessful");
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
-        }
-
     }
 }
 
