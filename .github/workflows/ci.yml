@@ -33,6 +33,3 @@ jobs:
 
       - name: Build project with Maven
         run: mvn clean install
-
-      - name: Run Unit Tests
-        run: mvn test
