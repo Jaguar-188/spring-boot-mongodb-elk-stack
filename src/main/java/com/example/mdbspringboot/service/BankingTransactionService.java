@@ -1,14 +1,15 @@
 package com.example.mdbspringboot.service;
 
 import com.example.mdbspringboot.exceptions.AmountCanNotBeNegativeOrZero;
+import com.example.mdbspringboot.exceptions.IncorrectAccountNumberException;
 import com.example.mdbspringboot.exceptions.InsufficientAmountException;
 import com.example.mdbspringboot.model.entity.*;
 import com.example.mdbspringboot.repository.AccountRepository;
 import com.example.mdbspringboot.repository.TransactionsRepository;
 import com.example.mdbspringboot.utils.BankingUtility;
-import org.apache.kafka.common.protocol.types.Field;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -42,9 +43,12 @@ public class BankingTransactionService {
 
     public DepositResponse depositAmount(Deposit depositDetails) {
 
+        if(depositDetails.getAmountToDeposit() <= 0){
+            throw new AmountCanNotBeNegativeOrZero("Amount can not be zero or negative");
+        }
         DepositResponse depositResponse = new DepositResponse();
         Transactions transaction = new Transactions();
-        Account account = accountRepository.findByAccountNumber(depositDetails.getAccountNumber());
+        Account account = findAccountByAccountNumber(depositDetails.getAccountNumber());
         account.setBalance(account.getBalance() + depositDetails.getAmountToDeposit());
         Account account1 = accountRepository.save(account);
         transaction.setId(UUID.randomUUID().toString());
@@ -96,7 +100,7 @@ public class BankingTransactionService {
         if(withdrawDetails.getAmountToBeWithdraw() < 0.0 || withdrawDetails.getAmountToBeWithdraw() == 0.0){
             throw new AmountCanNotBeNegativeOrZero("Amount can not be zero or negative");
         }
-        Account account = accountRepository.findByAccountNumber(withdrawDetails.getAccountNumber());
+        Account account = findAccountByAccountNumber(withdrawDetails.getAccountNumber());
         if(account.getBalance() < withdrawDetails.getAmountToBeWithdraw())
         {
             throw new InsufficientAmountException("Insufficient amount. Money did not withdrawn.");
@@ -115,5 +119,11 @@ public class BankingTransactionService {
         withdrawResponse.setWithdrawMessage("Successfully Withdrawn from the account");
         withdrawResponse.setBalance(account1.getBalance());
         return withdrawResponse;
+    }
+
+    private Account findAccountByAccountNumber(String accountNumber) {
+
+        return Optional.ofNullable(accountRepository.findByAccountNumber(accountNumber))
+                .orElseThrow(() -> new IncorrectAccountNumberException("Incorrect account number or is not valid."));
     }
 }

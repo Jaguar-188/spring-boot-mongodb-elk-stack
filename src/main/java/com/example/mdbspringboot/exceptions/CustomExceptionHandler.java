@@ -7,7 +7,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
-import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import java.time.LocalDateTime;
 
@@ -85,6 +84,22 @@ public class CustomExceptionHandler {
         ExceptionMessage exception = new ExceptionMessage(
                 LocalDateTime.now(),
                 amountCanNotBeNegativeOrZero.getMessage(),
+                webRequest.getDescription(false).replace("uri=",""),
+                String.valueOf(HttpStatus.BAD_REQUEST),
+                Integer.parseInt(String.valueOf(HttpStatus.BAD_REQUEST).substring(0,3))
+        );
+
+        return new ResponseEntity<>(exception,HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler({IncorrectAccountNumberException.class})
+    protected ResponseEntity<ExceptionMessage> incorrectAccountNumberExceptionHandler(IncorrectAccountNumberException incorrectAccountNumberException, WebRequest webRequest){
+
+        log.info("Resolving Incorrect Account Number Exception");
+
+        ExceptionMessage exception = new ExceptionMessage(
+                LocalDateTime.now(),
+                incorrectAccountNumberException.getMessage(),
                 webRequest.getDescription(false).replace("uri=",""),
                 String.valueOf(HttpStatus.BAD_REQUEST),
                 Integer.parseInt(String.valueOf(HttpStatus.BAD_REQUEST).substring(0,3))
